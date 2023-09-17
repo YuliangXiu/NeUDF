@@ -1,0 +1,8 @@
+*.zip
+*.pyc
+*.so
+*.o
+
+public_data
+exp
+

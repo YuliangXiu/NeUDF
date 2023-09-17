@@ -22,6 +22,8 @@ from scipy.sparse import coo_matrix
 from collections import defaultdict
 
 import lib.workspace as ws
+import logging
+logging.getLogger('asyncio').setLevel(logging.WARNING)
 
 import sys
 sys.path.append('custom_mc')

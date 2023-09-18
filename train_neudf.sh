@@ -1,7 +1,8 @@
+#!/bin/bash
+
 getenv=True
 source /home/yxiu/miniconda3/bin/activate neuraludf
 
-#!/bin/bash
 usage() {
   echo "Usage: ${0} [-c|--case]"  1>&2
   exit 1
@@ -20,4 +21,5 @@ while [[ $# -gt 0 ]];do
   esac
 done
 
-python exp_runner.py --mode train --conf ./confs/womask_open.conf --case ${CASE}
+# python exp_runner.py --mode train --conf ./confs/womask_open.conf --case ${CASE}
+python exp_runner.py --mode train --conf ./confs/wmask_open.conf --case ${CASE}

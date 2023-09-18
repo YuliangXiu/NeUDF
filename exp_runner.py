@@ -948,7 +948,8 @@ if __name__ == '__main__':
         elif args.mode == 'refine':
             runner.refine()
         elif args.mode == 'validate_image':
-            runner.validate_image(idx=args.idx)
+            for idx in range(200):
+                runner.validate_image(idx=idx)
         elif args.mode == 'validate_ray':
             runner.renderer.iter_step = runner.iter_step
             runner.validate_ray()

@@ -1,11 +1,11 @@
 executable = /home/yxiu/Code/NeUDF/train_neudf.sh
 arguments = --case $(MyArg1)
 
-error = /home/yxiu/Code/NeUDF/logs/train_$(MyArg1).err
-output = /home/yxiu/Code/NeUDF/logs/train_$(MyArg1).out
-log = /home/yxiu/Code/NeUDF/logs/train_$(MyArg1).log
+error = /home/yxiu/Code/NeUDF/logs/train_wmask_$(MyArg1).err
+output = /home/yxiu/Code/NeUDF/logs/train_wmask_$(MyArg1).out
+log = /home/yxiu/Code/NeUDF/logs/train_wmask_$(MyArg1).log
 
-request_memory = 10000
+request_memory = 50000
 request_disk = 5G
 request_cpus = 6
 request_gpus = 1

@@ -33,7 +33,7 @@ done
 
 CUDA_VISIBLE_DEVICES=${GPU} python exp_runner.py --mode validate_image --conf ./confs/wmask_open.conf \
 --case ${CASE} --is_continue --resolution 512
-CUDA_VISIBLE_DEVICES=${GPU} python exp_runner.py --mode validate_mesh --conf ./confs/wmask_open.conf \
---case ${CASE} --is_continue --resolution 512
-CUDA_VISIBLE_DEVICES=${GPU} python exp_runner.py --mode validate_mesh_udf --conf ./confs/wmask_open.conf \
---case ${CASE} --is_continue --resolution 512
+# CUDA_VISIBLE_DEVICES=${GPU} python exp_runner.py --mode validate_mesh --conf ./confs/wmask_open.conf \
+# --case ${CASE} --is_continue --resolution 512
+# CUDA_VISIBLE_DEVICES=${GPU} python exp_runner.py --mode validate_mesh_udf --conf ./confs/wmask_open.conf \
+# --case ${CASE} --is_continue --resolution 512

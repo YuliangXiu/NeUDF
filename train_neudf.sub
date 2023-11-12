@@ -1,15 +1,14 @@
-executable = /home/yxiu/Code/NeUDF/train_neudf_dtu.sh
+executable = /home/yxiu/Code/NeUDF/train_neudf.sh
 arguments = --case $(MyArg1)
 
-error = /home/yxiu/Code/NeUDF/logs/train_dtu_wmask_diffuse_$(MyArg1).err
-output = /home/yxiu/Code/NeUDF/logs/train_dtu_wmask_diffuse_$(MyArg1).out
-log = /home/yxiu/Code/NeUDF/logs/train_dtu_wmask_diffuse_$(MyArg1).log
+error = /home/yxiu/Code/NeUDF/logs/train_wmask_$(MyArg1).err
+output = /home/yxiu/Code/NeUDF/logs/train_wmask_$(MyArg1).out
+log = /home/yxiu/Code/NeUDF/logs/train_wmask_$(MyArg1).log
 
 request_memory = 50000
 request_disk = 5G
-request_cpus = 6
+request_cpus = 8
 request_gpus = 1
-requirements = TARGET.CUDACapability > 7.5
-requirements = TARGET.CUDAGlobalMemoryMb > 10000
+requirements = (CUDADeviceName=="Quadro RTX 6000" && UtsnameNodename=!="g093" && UtsnameNodename=!="g081")
 
-queue MyArg1 from /home/yxiu/Code/NeUDF/train_dtu_lst.txt
+queue MyArg1 from /home/yxiu/Code/NeuralUDF/tmp_lst.txt

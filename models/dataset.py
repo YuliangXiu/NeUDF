@@ -184,7 +184,7 @@ class Dataset:
         return near, far
 
     def image_at(self, idx, resolution_level):
-        img = cv.imread(self.images_lis[idx])
+        img = cv.imread(self.images_lis[idx], cv.IMREAD_UNCHANGED)
         return (cv.resize(img, (self.W // resolution_level, self.H // resolution_level))).clip(0, 255)
 
     def gen_patch_rays_at(self, img_idx, batch_size, patch_size):

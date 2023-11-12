@@ -229,7 +229,7 @@ class Runner:
                 self.validate_image(up_sample=True)
 
             if self.iter_step % self.val_mesh_freq == 0:
-                self.validate_mesh(world_space=True, resolution=256, threshold=self.mcube_threshold)
+                self.validate_mesh(world_space=True, resolution=512, threshold=self.mcube_threshold)
 
             self.update_learning_rate()
 
@@ -317,6 +317,7 @@ class Runner:
         rays_d = rays_d.reshape(-1, 3).split(self.batch_size)
 
         out_rgb_fine = []
+        out_mask_fine = []
         out_normal_fine = []
 
         for rays_o_batch, rays_d_batch in zip(rays_o, rays_d):
@@ -331,11 +332,13 @@ class Runner:
                                               background_rgb=background_rgb,
                                               up_sample=up_sample,
                                               )
+            weight_sum = render_out['weights'].sum(dim=-1, keepdim=True)
 
             def feasible(key): return (key in render_out) and (render_out[key] is not None)
 
             if feasible('color_fine'):
                 out_rgb_fine.append(render_out['color_fine'].detach().cpu().numpy())
+                out_mask_fine.append(weight_sum.detach().cpu().numpy())
             if feasible('gradients') and feasible('weights'):
                 n_samples = self.renderer.n_samples + self.renderer.n_importance
                 normals = render_out['gradients'] * render_out['weights'][:, :n_samples, None]
@@ -347,30 +350,38 @@ class Runner:
 
         img_fine = None
         if len(out_rgb_fine) > 0:
-            img_fine = (np.concatenate(out_rgb_fine, axis=0).reshape([H, W, 3, -1]) * 256).clip(0, 255)
+            img_fine = (np.concatenate(out_rgb_fine, axis=0).reshape([H, W, 3]) * 256).clip(0, 255)
+            mask_fine = (np.concatenate(out_mask_fine, axis=0).reshape([H, W, 1]) * 255).clip(0, 255)
 
-        normal_img = None
-        if len(out_normal_fine) > 0:
-            normal_img = np.concatenate(out_normal_fine, axis=0)
-            rot = np.linalg.inv(self.dataset.pose_all[idx, :3, :3].detach().cpu().numpy())
-            normal_img = (np.matmul(rot[None, :, :], normal_img[:, :, None])
-                          .reshape([H, W, 3, -1]) * 128 + 128).clip(0, 255)
+        # normal_img = None
+        # if len(out_normal_fine) > 0:
+        #     normal_img = np.concatenate(out_normal_fine, axis=0)
+        #     rot = np.linalg.inv(self.dataset.pose_all[idx, :3, :3].detach().cpu().numpy())
+        #     normal_img = (np.matmul(rot[None, :, :], normal_img[:, :, None])
+        #                   .reshape([H, W, 3, -1]) * 128 + 128).clip(0, 255)
 
-        os.makedirs(os.path.join(self.base_exp_dir, 'validations_fine'), exist_ok=True)
-        os.makedirs(os.path.join(self.base_exp_dir, 'normals'), exist_ok=True)
+        # os.makedirs(os.path.join(self.base_exp_dir, 'validations_fine'), exist_ok=True)
+        # os.makedirs(os.path.join(self.base_exp_dir, 'normals'), exist_ok=True)
 
-        for i in range(img_fine.shape[-1]):
-            if len(out_rgb_fine) > 0:
-                cv.imwrite(os.path.join(self.base_exp_dir,
-                                        'validations_fine',
-                                        '{:0>8d}_{}_{}.png'.format(self.iter_step, i, idx)),
-                           np.concatenate([img_fine[..., i],
-                                           self.dataset.image_at(idx, resolution_level=resolution_level)]))
-            if len(out_normal_fine) > 0:
-                cv.imwrite(os.path.join(self.base_exp_dir,
-                                        'normals',
-                                        '{:0>8d}_{}_{}.png'.format(self.iter_step, i, idx)),
-                           normal_img[..., i])
+        # for i in range(img_fine.shape[-1]):
+        #     if len(out_rgb_fine) > 0:
+        #         cv.imwrite(os.path.join(self.base_exp_dir,
+        #                                 'validations_fine',
+        #                                 '{:0>8d}_{}_{}.png'.format(self.iter_step, i, idx)),
+        #                    np.concatenate([img_fine[..., i],
+        #                                    self.dataset.image_at(idx, resolution_level=resolution_level)]))
+        #     if len(out_normal_fine) > 0:
+        #         cv.imwrite(os.path.join(self.base_exp_dir,
+        #                                 'normals',
+        #                                 '{:0>8d}_{}_{}.png'.format(self.iter_step, i, idx)),
+        #                    normal_img[..., i])
+        
+        os.makedirs(os.path.join(self.base_exp_dir, 'novel_view'), exist_ok=True)
+        cv.imwrite(os.path.join(self.base_exp_dir, 'novel_view',
+                                'pred_{}.png'.format(idx)), np.concatenate([img_fine,mask_fine],axis=-1))
+        cv.imwrite(os.path.join(self.base_exp_dir, 'novel_view',
+                                'gt_{}.png'.format(idx)),
+                    self.dataset.image_at(idx, resolution_level=resolution_level))
 
     def render_novel_image(self, idx_0, idx_1, ratio, resolution_level):
         """
@@ -949,7 +960,7 @@ if __name__ == '__main__':
             runner.refine()
         elif args.mode == 'validate_image':
             for idx in range(200):
-                runner.validate_image(idx=idx)
+                runner.validate_image(idx=idx, resolution_level=1)
         elif args.mode == 'validate_ray':
             runner.renderer.iter_step = runner.iter_step
             runner.validate_ray()
